@@ -1,5 +1,7 @@
 import pygame
 import json
+
+import settings
 from settings import *
 from Enemy import Enemy
 from world import World
@@ -15,6 +17,8 @@ clock = pygame.time.Clock()
 screen = pygame.display.set_mode((screen_w+SIDE_PANEL,screen_h))
 pygame.display.set_caption("Game")
 
+
+last_enemy_spawn = pygame.time.get_ticks()
 placing_turrets = False
 selected_turret = None
 
@@ -73,7 +77,7 @@ def clear_select():
 #Создание уровня
 world = World(world_data,map_image)
 world.process_data()
-
+world.spawn_enemies( )
 
 
 
@@ -84,12 +88,6 @@ turret_group = pygame.sprite.Group()
 turret_button = Button(screen_w + 30, 120, buy_turrets_image,True)
 cancel_turret_button = Button(screen_w + 50, 180, cancel_image,True)
 grade_button = Button(screen_w + 5, 180, grade_turrets_image,True)
-
-
-#Создание врага и добавление в группу
-enemy_type = 'weak'
-enemy = Enemy(enemy_type,world.waypoints,enemy_images)
-enemy_group.add(enemy)
 
 
 # Игровой цикл
@@ -121,6 +119,13 @@ while run:
     for turret in turret_group:
         turret.draw(screen)
     turret_group.draw(screen)
+
+    if pygame.time.get_ticks() - last_enemy_spawn > settings.SPAWN_RATE:
+        enemy_type = world.enemy_list[world.spawned]
+        enemy = Enemy(enemy_type, world.waypoints, enemy_images)
+        enemy_group.add(enemy)
+        world.spawned += 1
+        last_enemy_spawn = pygame.time.get_ticks()
 
 
 
