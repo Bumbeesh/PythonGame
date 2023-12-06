@@ -1,5 +1,6 @@
 import pygame
 
+import settings
 from settings import *
 import math
 from turret_grading import TURRET_DATA
@@ -78,12 +79,15 @@ class Turret(pygame.sprite.Sprite):
         y_distance = 0
 
         for enemy in enemy_group:
-            x_distance = enemy.pos[0] - self.x
-            y_distance = enemy.pos[1] - self.y
-            dist = math.sqrt(x_distance**2 + y_distance**2)
-            if dist < self.range:
-                self.target = enemy
-                self.angle = math.degrees(math.atan2(-y_distance,x_distance))
+            if enemy.health > 0:
+                x_distance = enemy.pos[0] - self.x
+                y_distance = enemy.pos[1] - self.y
+                dist = math.sqrt(x_distance**2 + y_distance**2)
+                if dist < self.range:
+                    self.target = enemy
+                    self.angle = math.degrees(math.atan2(-y_distance,x_distance))
+                    self.target.health -= settings.DAMAGE
+                    break
 
     def load_images(self):
         size = self.sprite_sheet.get_height()

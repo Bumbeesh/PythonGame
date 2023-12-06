@@ -2,6 +2,7 @@ import pygame
 from pygame.math import Vector2
 import math
 from enemyStats import enemy_data
+import settings
 
 class Enemy(pygame.sprite.Sprite):
     def __init__(self,enemy_type,waypounts, images):
@@ -17,11 +18,12 @@ class Enemy(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.center = self.pos
 
-    def update(self):
-        self.move()
+    def update(self,world):
+        self.move(world)
         self.rotate()
+        self.check_alive(world)
 
-    def move(self):
+    def move(self,world):
         #Определение таргета
         if self.target_waypoint < len(self.waypoints):
             self.target = Vector2(self.waypoints[self.target_waypoint])
@@ -29,6 +31,7 @@ class Enemy(pygame.sprite.Sprite):
         else:
             #Враг достиг конца
             self.kill()
+            world.health -= 5
 
         #Вычисление дистанции до таргета
         distance = self.movement.length()
@@ -50,3 +53,8 @@ class Enemy(pygame.sprite.Sprite):
         self.image = pygame.transform.rotate(self.original_image,self.angle)
         self.rect = self.image.get_rect()
         self.rect.center = self.pos
+
+    def check_alive(self, world):
+        if self.health <= 0:
+            world.money += settings.KILL_GAIN_MONEY
+            self.kill()

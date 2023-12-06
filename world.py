@@ -1,9 +1,12 @@
 import pygame
 from enemyStats import enemy_spawn_data
 import random
+import settings
 class World():
     def __init__(self,data, map_image):
         self.level = 1
+        self.health = settings.HEALTH
+        self.money = settings.MONEY
         self.tile_map = []
         self.waypoints = []
         self.level_data = data

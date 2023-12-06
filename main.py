@@ -49,6 +49,14 @@ grade_turrets_image = pygame.image.load('assets/images/buttons/upgrade_turret.pn
 with open('levels/level.tmj') as file:
     world_data = json.load(file)
 
+text_font = pygame.font.SysFont("Consolas",24,bold = True)
+large_font = pygame.font.SysFont("Consolas",36)
+
+def draw_text(text,font,text_col,x,y):
+    image = font.render(text, True, text_col)
+    screen.blit(image,(x,y))
+
+
 def create_turret(mouse_pos):
     mouse_tile_x = mouse_pos[0] // TILE_SIZE
     mouse_tile_y = mouse_pos[1] // TILE_SIZE
@@ -61,6 +69,7 @@ def create_turret(mouse_pos):
         if free_space:
             new_turret = Turret(turret_sheet, mouse_tile_x, mouse_tile_y)
             turret_group.add(new_turret)
+            world.money -= settings.BUY_TURRET_COST
 
 def select_turret(mouse_pos):
     mouse_tile_x = mouse_pos[0] // TILE_SIZE
@@ -98,7 +107,7 @@ while run:
 
     #ОБНОВЛЕНИЕ#
 
-    enemy_group.update()
+    enemy_group.update(world)
     turret_group.update(enemy_group)
 
     if selected_turret:
@@ -120,12 +129,16 @@ while run:
         turret.draw(screen)
     turret_group.draw(screen)
 
+    draw_text(str(world.health),text_font,"grey100",0,0)
+    draw_text(str(world.money),text_font,"grey100",0,30)
+
     if pygame.time.get_ticks() - last_enemy_spawn > settings.SPAWN_RATE:
-        enemy_type = world.enemy_list[world.spawned]
-        enemy = Enemy(enemy_type, world.waypoints, enemy_images)
-        enemy_group.add(enemy)
-        world.spawned += 1
-        last_enemy_spawn = pygame.time.get_ticks()
+        if world.spawned < len(world.enemy_list):
+            enemy_type = world.enemy_list[world.spawned]
+            enemy = Enemy(enemy_type, world.waypoints, enemy_images)
+            enemy_group.add(enemy)
+            world.spawned += 1
+            last_enemy_spawn = pygame.time.get_ticks()
 
 
 
@@ -144,7 +157,9 @@ while run:
     if selected_turret:
         if selected_turret.upgrade_level < TURRET_LEVEL_MAX:
             if grade_button.draw(screen):
-                selected_turret.upgrade()
+                if world.money >= settings.UPGRADE_TURRET_COST:
+                    selected_turret.upgrade()
+                    world.money -= settings.UPGRADE_TURRET_COST
 
 
     for event in pygame.event.get():
@@ -157,7 +172,8 @@ while run:
                 selected_turret = None
                 clear_select()
                 if placing_turrets:
-                    create_turret(mouse_pos)
+                    if world.money >= settings.BUY_TURRET_COST:
+                        create_turret(mouse_pos)
                 else:
                     selected_turret = select_turret(mouse_pos)
 
