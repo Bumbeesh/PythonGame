@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="15" height="15" tilewidth="48" tileheight="48" infinite="0" nextlayerid="4" nextobjectid="28">
+<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="15" height="15" tilewidth="48" tileheight="48" infinite="0" nextlayerid="5" nextobjectid="4">
  <editorsettings>
   <export target="level2.tmj" format="json"/>
  </editorsettings>
  <tileset firstgid="1" source="TD tileset.tsx"/>
- <objectgroup id="3" name="waypoints" offsetx="0" offsety="-1">
-  <object id="27" x="0" y="96">
-   <polyline points="96,-96 96,0 192,0 192,240 48,240 48,576 192,576 192,480 288,480 288,336 432,336 432,144 336,144 336,0 624,0 624,528 432,528 432,624"/>
+ <objectgroup id="2" name="waypoints" opacity="0.6">
+  <object id="1" x="0" y="0">
+   <polyline points="96,0 96,96 192,96 192,336 48,336 48,672 192,672 192,576 288,576 288,432 432,432 432,240 336,240 336,96 624,96 624,624 432,624 432,720"/>
   </object>
  </objectgroup>
- <layer id="1" name="tilemap" width="15" height="15" visible="0">
+ <layer id="1" name="tilemap" width="15" height="15">
   <data encoding="csv">
 7,8,6,7,7,7,7,7,7,7,7,7,7,7,7,
 7,8,11,12,5,7,4,12,12,12,12,12,12,5,7,

@@ -1,6 +1,7 @@
 import pygame
 import json
 import time
+import random
 
 
 import settings
@@ -30,7 +31,11 @@ selected_turret = None
                                     #Картинки
 
 #Карта
-map_image = pygame.image.load('levels/level3.png').convert_alpha()
+map_images = [pygame.image.load('levels/level.png').convert_alpha(),
+              pygame.image.load('levels/level2.png').convert_alpha(),
+              pygame.image.load('levels/level3.png').convert_alpha()]
+
+#map_image = random.choice(map_images)
 
 #Враги
 enemy_images = {
@@ -63,8 +68,20 @@ shot_sound.set_volume(0.5)
 turret_sheet = pygame.image.load('assets/images/turrets/turret_1.png').convert_alpha()
 
 #JSON для уровня
-with open('levels/level3.tmj') as file:
-    world_data = json.load(file)
+
+with open('levels/level.tmj') as file:
+    world_data1 = json.load(file)
+
+with open('levels/level2.tmj') as file2:
+    world_data2 = json.load(file2)
+
+with open('levels/level3.tmj') as file3:
+    world_data3 = json.load(file3)
+
+world_datas = [world_data1,world_data2,world_data3]
+world_data = random.choice(world_datas)
+
+
 
 #Шрифты
 text_font = pygame.font.SysFont("Consolas",24,bold = True)
@@ -115,7 +132,8 @@ def clear_select():
 
 
 #Создание уровня
-world = World(world_data,map_image)
+
+world = World(world_data,map_images[world_datas.index(world_data)])
 world.process_data()
 world.spawn_enemies( )
 
@@ -242,7 +260,7 @@ while run:
             placing_turrets = False
             selected_turret = None
             last_enemy_spawn = pygame.time.get_ticks()
-            world = World(world_data,map_image)
+            world = World(world_data,random.choice(map_images))
             world.process_data()
             world.spawn_enemies()
             enemy_group.empty()
