@@ -31,14 +31,14 @@ class Enemy(pygame.sprite.Sprite):
         else:
             #Враг достиг конца
             self.kill()
-            world.health -= 5
+            world.health -= 1
             world.missed_enemy += 1
 
         #Вычисление дистанции до таргета
         distance = self.movement.length()
         #Проверка - оставшаяся длина больше скорости
-        if distance >= self.speed:
-            self.pos += (self.movement.normalize()) * self.speed
+        if distance >= (self.speed*world.game_speed):
+            self.pos += (self.movement.normalize()) * (self.speed*world.game_speed)
         else:
             if distance != 0:
                 self.pos += (self.movement.normalize()) * distance

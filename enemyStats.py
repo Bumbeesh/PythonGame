@@ -1,7 +1,7 @@
 enemy_spawn_data = [
   {
     #1
-    "weak": 0,
+    "weak": 15,
     "medium": 0,
     "strong": 0,
     "elite": 0

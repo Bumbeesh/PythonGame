@@ -7,7 +7,7 @@ from turret_grading import TURRET_DATA
 
 
 class Turret(pygame.sprite.Sprite):
-    def __init__(self,sprite_sheet,tile_x,tile_y):
+    def __init__(self,sprite_sheet,tile_x,tile_y,shot_sound):
         pygame.sprite.Sprite.__init__(self)
 
         self.upgrade_level = 1
@@ -26,7 +26,7 @@ class Turret(pygame.sprite.Sprite):
         self.y = (self.tile_y + 0.5) * TILE_SIZE
         self.lastshot = pygame.time.get_ticks()
 
-
+        self.shot_sound = shot_sound
 
 
 
@@ -53,11 +53,11 @@ class Turret(pygame.sprite.Sprite):
         self.range_rect = self.range_image.get_rect()
         self.range_rect.center = self.rect.center
 
-    def update(self,enemy_group):
+    def update(self,enemy_group,world):
         if self.target:
             self.play_animation()
         else:
-            if pygame.time.get_ticks() - self.lastshot > self.cd:
+            if pygame.time.get_ticks() - self.lastshot > (self.cd / world.game_speed):
                 self.pick_target(enemy_group)
 
     def play_animation(self):
@@ -84,9 +84,11 @@ class Turret(pygame.sprite.Sprite):
                 y_distance = enemy.pos[1] - self.y
                 dist = math.sqrt(x_distance**2 + y_distance**2)
                 if dist < self.range:
+
                     self.target = enemy
                     self.angle = math.degrees(math.atan2(-y_distance,x_distance))
                     self.target.health -= settings.DAMAGE
+                    self.shot_sound.play()
                     break
 
     def load_images(self):

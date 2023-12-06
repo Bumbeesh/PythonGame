@@ -4,6 +4,7 @@ import random
 import settings
 class World():
     def __init__(self,data, map_image):
+        self.game_speed = 1
         self.level = 1
         self.health = settings.HEALTH
         self.money = settings.MONEY

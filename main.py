@@ -1,5 +1,7 @@
 import pygame
 import json
+import time
+
 
 import settings
 from settings import *
@@ -18,6 +20,7 @@ screen = pygame.display.set_mode((screen_w+SIDE_PANEL,screen_h))
 pygame.display.set_caption("Game")
 
 game_over = False
+game_pause = False
 game_win_or_lost = 0 # 1 если победа, 0 - поражение
 last_enemy_spawn = pygame.time.get_ticks()
 start_level = False
@@ -25,8 +28,10 @@ placing_turrets = False
 selected_turret = None
 
                                     #Картинки
+
 #Карта
-map_image = pygame.image.load('levels/level.png').convert_alpha()
+map_image = pygame.image.load('levels/level2.png').convert_alpha()
+
 #Враги
 enemy_images = {
     'weak':pygame.image.load('assets/enemies/enemy_1.png').convert_alpha(),
@@ -34,36 +39,53 @@ enemy_images = {
 'strong':pygame.image.load('assets/enemies/enemy_3.png').convert_alpha(),
 'elite':pygame.image.load('assets/enemies/enemy_4.png').convert_alpha()
 }
-enemy_image = pygame.image.load('assets/enemies/enemy_1.png').convert_alpha()
+
 #Турелька
 cursor_turret = pygame.image.load('assets/images/turrets/cursor_turret.png')
-#Кнопки
 
+#Кнопки
 buy_turrets_image = pygame.image.load('assets/images/buttons/buy_turret.png').convert_alpha()
 cancel_image = pygame.image.load('assets/images/buttons/cancel.png').convert_alpha()
 grade_turrets_image = pygame.image.load('assets/images/buttons/upgrade_turret.png').convert_alpha()
 begin_game_image = pygame.image.load('assets/images/buttons/begin.png')
 restart_game_image = pygame.image.load('assets/images/buttons/restart.png')
+fast_game_image = pygame.image.load('assets/images/buttons/fast_forward.png')
+heart_image = pygame.image.load('assets/images/gui/heart.png')
+money_image = pygame.image.load('assets/images/gui/coin.png')
+pause_image = pygame.image.load('assets/images/buttons/pause.png')
+resume_image = pygame.image.load('assets/images/gui/coin.png')
+
+#Звук
+shot_sound = pygame.mixer.Sound('assets/audio/shot.wav')
+shot_sound.set_volume(0.5)
 
 #Анимация
 turret_sheet = pygame.image.load('assets/images/turrets/turret_1.png').convert_alpha()
 
-
-
-
-
 #JSON для уровня
-with open('levels/level.tmj') as file:
+with open('levels/level2.tmj') as file:
     world_data = json.load(file)
 
+#Шрифты
 text_font = pygame.font.SysFont("Consolas",24,bold = True)
 large_font = pygame.font.SysFont("Consolas",36)
 
+#Отрисовка текста
 def draw_text(text,font,text_col,x,y):
     image = font.render(text, True, text_col)
     screen.blit(image,(x,y))
 
+#Интерфейс(хп,деньги,уровень)
+def GUI():
+    pygame.draw.rect(screen,'maroon',(screen_w,0,settings.SIDE_PANEL,screen_h))
+    pygame.draw.rect(screen,'grey0',(screen_w,0,settings.SIDE_PANEL,400),2)
+    draw_text("LEVEL: " + str(world.level), text_font, "grey100", screen_w + 10, 10)
+    screen.blit(heart_image, (screen_w + 10, 35))
+    draw_text(str(world.health), text_font, "grey100", screen_w + 50, 40)
+    screen.blit(money_image, (screen_w + 10, 65))
+    draw_text(str(world.money), text_font, "grey100", screen_w + 50, 70)
 
+#Создание турели
 def create_turret(mouse_pos):
     mouse_tile_x = mouse_pos[0] // TILE_SIZE
     mouse_tile_y = mouse_pos[1] // TILE_SIZE
@@ -74,10 +96,11 @@ def create_turret(mouse_pos):
             if (mouse_tile_x,mouse_tile_y) == (turret.tile_x,turret.tile_y):
                 free_space = False
         if free_space:
-            new_turret = Turret(turret_sheet, mouse_tile_x, mouse_tile_y)
+            new_turret = Turret(turret_sheet, mouse_tile_x, mouse_tile_y,shot_sound)
             turret_group.add(new_turret)
             world.money -= settings.BUY_TURRET_COST
 
+#Выбор турели
 def select_turret(mouse_pos):
     mouse_tile_x = mouse_pos[0] // TILE_SIZE
     mouse_tile_y = mouse_pos[1] // TILE_SIZE
@@ -85,6 +108,7 @@ def select_turret(mouse_pos):
         if (mouse_tile_x, mouse_tile_y) == (turret.tile_x, turret.tile_y):
             return turret
 
+#Очистка выбора(исчезновение белой зоны)
 def clear_select():
     for turret in turret_group:
         turret.selected = False
@@ -95,22 +119,25 @@ world = World(world_data,map_image)
 world.process_data()
 world.spawn_enemies( )
 
-
-
 #Создание группы врагов
 enemy_group = pygame.sprite.Group()
 turret_group = pygame.sprite.Group()
 
+#Кнопки
 turret_button = Button(screen_w + 30, 120, buy_turrets_image,True)
 cancel_turret_button = Button(screen_w + 50, 180, cancel_image,True)
 grade_button = Button(screen_w + 5, 180, grade_turrets_image,True)
 begin_button = Button(screen_w + 60, 300, begin_game_image,True)
 restart_button = Button(310, 300, restart_game_image,True)
-
+fast_game_button = Button(screen_w+50, 300, fast_game_image,False)
+pause_game_button = Button(0,0,pause_image,True)
+resume_game_button = Button(70,0,resume_image,True)
 
 # Игровой цикл
 run = True
 while run:
+
+
 
     clock.tick(FPS)
 
@@ -124,17 +151,17 @@ while run:
             game_over = True
             game_win_or_lost = 1
 
+
+
+#Отрисовка турели и врагов
         enemy_group.update(world)
-        turret_group.update(enemy_group)
+        turret_group.update(enemy_group,world)
 
         if selected_turret:
             selected_turret.selected = True
 
 
     #ОТРИСОВКА#
-
-    #Движение врага и обновление экрана(чтобы не было следа)
-    screen.fill("grey100")
 
     #Отрисовка уровня
     world.draw(screen)
@@ -146,16 +173,19 @@ while run:
         turret.draw(screen)
     turret_group.draw(screen)
 
-    draw_text(str(world.health),text_font,"grey100",0,0)
-    draw_text(str(world.money),text_font,"grey100",0,30)
-    draw_text(str(world.level),text_font,"grey100",0,60)
+    GUI()
 
     if not(game_over):
+
         #Проверка на старт уровня
         if not(start_level):
             if begin_button.draw(screen):
                 start_level = True
         else:
+            #Ускорение игры
+            world.game_speed = 1
+            if fast_game_button.draw(screen):
+                world.game_speed = 2
             if pygame.time.get_ticks() - last_enemy_spawn > settings.SPAWN_RATE:
                 if world.spawned < len(world.enemy_list):
                     enemy_type = world.enemy_list[world.spawned]
@@ -175,6 +205,11 @@ while run:
 
 
         #Отрисовка кнопок
+        draw_text(str(settings.BUY_TURRET_COST),text_font,"grey100",screen_w+215,135)
+        screen.blit(money_image,(screen_w+260,130))
+
+
+
         if turret_button.draw(screen):
             placing_turrets = True
         if placing_turrets:
@@ -187,6 +222,8 @@ while run:
                 placing_turrets = False
         if selected_turret:
             if selected_turret.upgrade_level < TURRET_LEVEL_MAX:
+                draw_text(str(settings.UPGRADE_TURRET_COST), text_font, "grey100", screen_w + 215, 195)
+                screen.blit(money_image, (screen_w + 260, 190))
                 if grade_button.draw(screen):
                     if world.money >= settings.UPGRADE_TURRET_COST:
                         selected_turret.upgrade()
@@ -198,6 +235,7 @@ while run:
         elif game_win_or_lost == 1:
             draw_text("WIN!", large_font,"grey0",370,230)
 
+#Рестарт(обнуление всего)
         if restart_button.draw(screen):
             game_over = False
             start_level = False
@@ -212,7 +250,17 @@ while run:
             turret_group.empty()
 
 
+
+
+
     for event in pygame.event.get():
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_ESCAPE]:
+            game_pause = True
+            print('123')
+        if keys[pygame.K_SPACE]:
+            game_pause = False
+            print('321')
         if event.type == pygame.QUIT:
             run = False
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
@@ -226,6 +274,7 @@ while run:
                         create_turret(mouse_pos)
                 else:
                     selected_turret = select_turret(mouse_pos)
+
 
 
     pygame.display.flip()
