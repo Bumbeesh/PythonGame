@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="15" height="15" tilewidth="48" tileheight="48" infinite="0" nextlayerid="3" nextobjectid="2">
+ <editorsettings>
+  <export format="json"/>
+ </editorsettings>
+ <tileset firstgid="1" source="TD tileset.tsx"/>
+ <layer id="1" name="tilemap" width="15" height="15">
+  <data encoding="csv">
+4,12,12,12,12,12,12,12,12,12,12,12,12,13,6,
+8,1,2,2,2,2,2,2,2,2,2,2,2,2,10,
+8,6,0,0,7,7,0,0,7,7,0,0,7,7,7,
+8,11,12,12,12,12,12,12,12,12,12,12,12,5,7,
+9,2,2,2,2,2,2,2,2,2,2,2,3,6,7,
+7,7,0,0,7,7,0,0,7,7,0,0,8,6,7,
+7,7,0,0,7,7,0,0,7,7,0,0,8,6,7,
+7,7,7,7,7,7,7,7,7,7,7,7,8,6,7,
+7,7,7,7,7,7,7,7,7,7,7,7,8,6,7,
+4,12,12,12,12,5,7,7,4,12,12,12,13,6,7,
+8,1,2,2,3,6,7,7,8,1,2,2,2,10,7,
+8,6,0,0,8,6,0,0,8,6,0,0,7,7,7,
+8,6,0,0,8,6,0,0,8,6,0,0,7,7,7,
+8,6,7,7,8,11,12,12,13,6,7,7,7,7,7,
+8,6,7,7,9,2,2,2,2,10,7,7,7,7,7
+</data>
+ </layer>
+ <objectgroup id="2" name="waypoints">
+  <object id="1" x="48" y="720">
+   <polyline points="0,0 0,-240 192,-240 192,-48 384,-48 384,-240 576,-240 576,-528 0,-528 0,-672 624,-672 624,-720"/>
+  </object>
+ </objectgroup>
+</map>

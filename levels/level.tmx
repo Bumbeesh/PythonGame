@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.10.1" orientation="orthogonal" renderorder="right-down" width="15" height="15" tilewidth="48" tileheight="48" infinite="0" nextlayerid="4" nextobjectid="2">
+<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="15" height="15" tilewidth="48" tileheight="48" infinite="0" nextlayerid="4" nextobjectid="4">
+ <editorsettings>
+  <export target="level3.tmj" format="json"/>
+ </editorsettings>
  <tileset firstgid="1" source="TD tileset.tsx"/>
- <objectgroup id="2" name="waypoints">
-  <object id="1" x="0" y="0">
-   <polyline points="624.29,-0.2354 623.678,191.724 479.966,192.118 479.882,96.006 95.9785,95.8455 96.1,479.978 240.224,480.037 239.834,287.851 384.029,288.047 384.028,336.083 672.128,335.947 672.095,623.988 527.884,624.03 528.001,480.038 383.978,480.048 384.031,623.969 -59.2385,623.619"/>
-  </object>
- </objectgroup>
  <layer id="1" name="tilemap" width="15" height="15">
   <data encoding="csv">
 7,7,7,7,7,7,7,7,7,7,7,7,8,6,7,
@@ -25,4 +23,9 @@
 7,7,7,7,7,7,7,7,7,7,7,7,7,7,7
 </data>
  </layer>
+ <objectgroup id="2" name="waypoints" opacity="0.6">
+  <object id="1" x="0" y="0">
+   <polyline points="96,0 96,96 192,96 192,336 48,336 48,672 192,672 192,576 288,576 288,432 432,432 432,240 336,240 336,96 623.969,96 624,624 432,624 432,720"/>
+  </object>
+ </objectgroup>
 </map>

@@ -5,9 +5,9 @@ from enemyStats import enemy_data
 import settings
 
 class Enemy(pygame.sprite.Sprite):
-    def __init__(self,enemy_type,waypounts, images):
+    def __init__(self,enemy_type,waypoints, images):
         pygame.sprite.Sprite.__init__(self)
-        self.waypoints = waypounts
+        self.waypoints = waypoints
         self.pos = Vector2(self.waypoints[0])
         self.target_waypoint = 1
         self.health = enemy_data.get(enemy_type)["health"]

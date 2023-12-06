@@ -30,7 +30,7 @@ selected_turret = None
                                     #Картинки
 
 #Карта
-map_image = pygame.image.load('levels/level2.png').convert_alpha()
+map_image = pygame.image.load('levels/level3.png').convert_alpha()
 
 #Враги
 enemy_images = {
@@ -63,7 +63,7 @@ shot_sound.set_volume(0.5)
 turret_sheet = pygame.image.load('assets/images/turrets/turret_1.png').convert_alpha()
 
 #JSON для уровня
-with open('levels/level2.tmj') as file:
+with open('levels/level3.tmj') as file:
     world_data = json.load(file)
 
 #Шрифты
@@ -245,13 +245,8 @@ while run:
             world = World(world_data,map_image)
             world.process_data()
             world.spawn_enemies()
-
             enemy_group.empty()
             turret_group.empty()
-
-
-
-
 
     for event in pygame.event.get():
         keys = pygame.key.get_pressed()
