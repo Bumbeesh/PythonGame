@@ -32,6 +32,7 @@ class Enemy(pygame.sprite.Sprite):
             #Враг достиг конца
             self.kill()
             world.health -= 5
+            world.missed_enemy += 1
 
         #Вычисление дистанции до таргета
         distance = self.movement.length()
@@ -58,3 +59,4 @@ class Enemy(pygame.sprite.Sprite):
         if self.health <= 0:
             world.money += settings.KILL_GAIN_MONEY
             self.kill()
+            world.killed_enemy += 1

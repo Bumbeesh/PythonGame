@@ -17,8 +17,10 @@ clock = pygame.time.Clock()
 screen = pygame.display.set_mode((screen_w+SIDE_PANEL,screen_h))
 pygame.display.set_caption("Game")
 
-
+game_over = False
+game_win_or_lost = 0 # 1 если победа, 0 - поражение
 last_enemy_spawn = pygame.time.get_ticks()
+start_level = False
 placing_turrets = False
 selected_turret = None
 
@@ -36,11 +38,16 @@ enemy_image = pygame.image.load('assets/enemies/enemy_1.png').convert_alpha()
 #Турелька
 cursor_turret = pygame.image.load('assets/images/turrets/cursor_turret.png')
 #Кнопки
+
 buy_turrets_image = pygame.image.load('assets/images/buttons/buy_turret.png').convert_alpha()
 cancel_image = pygame.image.load('assets/images/buttons/cancel.png').convert_alpha()
+grade_turrets_image = pygame.image.load('assets/images/buttons/upgrade_turret.png').convert_alpha()
+begin_game_image = pygame.image.load('assets/images/buttons/begin.png')
+restart_game_image = pygame.image.load('assets/images/buttons/restart.png')
+
 #Анимация
 turret_sheet = pygame.image.load('assets/images/turrets/turret_1.png').convert_alpha()
-grade_turrets_image = pygame.image.load('assets/images/buttons/upgrade_turret.png').convert_alpha()
+
 
 
 
@@ -97,6 +104,8 @@ turret_group = pygame.sprite.Group()
 turret_button = Button(screen_w + 30, 120, buy_turrets_image,True)
 cancel_turret_button = Button(screen_w + 50, 180, cancel_image,True)
 grade_button = Button(screen_w + 5, 180, grade_turrets_image,True)
+begin_button = Button(screen_w + 60, 300, begin_game_image,True)
+restart_button = Button(310, 300, restart_game_image,True)
 
 
 # Игровой цикл
@@ -107,11 +116,19 @@ while run:
 
     #ОБНОВЛЕНИЕ#
 
-    enemy_group.update(world)
-    turret_group.update(enemy_group)
+    if not(game_over):
+        if world.health <= 0:
+            game_over = True
+            game_win_or_lost = -1
+        if world.level > settings.LEVEL_COUNT:
+            game_over = True
+            game_win_or_lost = 1
 
-    if selected_turret:
-        selected_turret.selected = True
+        enemy_group.update(world)
+        turret_group.update(enemy_group)
+
+        if selected_turret:
+            selected_turret.selected = True
 
 
     #ОТРИСОВКА#
@@ -131,35 +148,68 @@ while run:
 
     draw_text(str(world.health),text_font,"grey100",0,0)
     draw_text(str(world.money),text_font,"grey100",0,30)
+    draw_text(str(world.level),text_font,"grey100",0,60)
 
-    if pygame.time.get_ticks() - last_enemy_spawn > settings.SPAWN_RATE:
-        if world.spawned < len(world.enemy_list):
-            enemy_type = world.enemy_list[world.spawned]
-            enemy = Enemy(enemy_type, world.waypoints, enemy_images)
-            enemy_group.add(enemy)
-            world.spawned += 1
+    if not(game_over):
+        #Проверка на старт уровня
+        if not(start_level):
+            if begin_button.draw(screen):
+                start_level = True
+        else:
+            if pygame.time.get_ticks() - last_enemy_spawn > settings.SPAWN_RATE:
+                if world.spawned < len(world.enemy_list):
+                    enemy_type = world.enemy_list[world.spawned]
+                    enemy = Enemy(enemy_type, world.waypoints, enemy_images)
+                    enemy_group.add(enemy)
+                    world.spawned += 1
+                    last_enemy_spawn = pygame.time.get_ticks()
+
+        #Проверка завершения волны
+        if world.check_level_complete():
+            world.level += 1
+            start_level = False
             last_enemy_spawn = pygame.time.get_ticks()
+            world.reset_level_count()
+            world.spawn_enemies()
+            world.money += settings.LEVEL_COMPLETE_GAIN
 
 
+        #Отрисовка кнопок
+        if turret_button.draw(screen):
+            placing_turrets = True
+        if placing_turrets:
+            cursor_rect = cursor_turret.get_rect()
+            cursor_pos = pygame.mouse.get_pos()
+            cursor_rect.center = cursor_pos
+            if cursor_pos[0] <= screen_w:
+                screen.blit(cursor_turret,cursor_rect)
+            if cancel_turret_button.draw(screen):
+                placing_turrets = False
+        if selected_turret:
+            if selected_turret.upgrade_level < TURRET_LEVEL_MAX:
+                if grade_button.draw(screen):
+                    if world.money >= settings.UPGRADE_TURRET_COST:
+                        selected_turret.upgrade()
+                        world.money -= settings.UPGRADE_TURRET_COST
+    else:
+        pygame.draw.rect(screen,"dodgerblue",(200,200,400,200),border_radius=30)
+        if game_win_or_lost == -1:
+            draw_text("GAME OVER", large_font,"grey0",310,230)
+        elif game_win_or_lost == 1:
+            draw_text("WIN!", large_font,"grey0",370,230)
 
-
-    #Отрисовка кнопок
-    if turret_button.draw(screen):
-        placing_turrets = True
-    if placing_turrets:
-        cursor_rect = cursor_turret.get_rect()
-        cursor_pos = pygame.mouse.get_pos()
-        cursor_rect.center = cursor_pos
-        if cursor_pos[0] <= screen_w:
-            screen.blit(cursor_turret,cursor_rect)
-        if cancel_turret_button.draw(screen):
+        if restart_button.draw(screen):
+            game_over = False
+            start_level = False
             placing_turrets = False
-    if selected_turret:
-        if selected_turret.upgrade_level < TURRET_LEVEL_MAX:
-            if grade_button.draw(screen):
-                if world.money >= settings.UPGRADE_TURRET_COST:
-                    selected_turret.upgrade()
-                    world.money -= settings.UPGRADE_TURRET_COST
+            selected_turret = None
+            last_enemy_spawn = pygame.time.get_ticks()
+            world = World(world_data,map_image)
+            world.process_data()
+            world.spawn_enemies()
+
+            enemy_group.empty()
+            turret_group.empty()
 
 
     for event in pygame.event.get():
